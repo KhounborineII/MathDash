@@ -36,8 +36,8 @@ class QuestionGenerator {
     _questionsAsked++;
     
     int choice = _rand.nextInt(_operations.length);
-    int firstNum = _rand.nextInt(99) + 1;
-    int secondNum = _rand.nextInt(99) + 1;
+    int firstNum = _rand.nextInt(25) + 1; // numbers in the range 1..25
+    int secondNum = _rand.nextInt(25) + 1;
 
     OpPair chosenOp = _operations[choice];
 
