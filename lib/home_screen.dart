@@ -11,7 +11,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  
   @override
   Widget build(BuildContext context) {
     void openGame() {
@@ -23,32 +22,37 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        automaticallyImplyLeading: false,
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextField(
-              onChanged: (value) {
-                setState(() {});
-              },
-              decoration: const InputDecoration(hintText: "IP Address"),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-                width: 300,
-                height: 100,
-                child: ElevatedButton(
-                    key: const Key("PlayButton"),
-                    onPressed: openGame,
-                    style: ElevatedButton.styleFrom(
-                        textStyle: const TextStyle(fontSize: 30)),
-                    child: const Text("Play!"))),
-          ],
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+          automaticallyImplyLeading: false,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              TextField(
+                onChanged: (value) {
+                  setState(() {});
+                },
+                decoration: const InputDecoration(hintText: "IP Address"),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                  width: 300,
+                  height: 100,
+                  child: ElevatedButton(
+                      key: const Key("PlayButton"),
+                      onPressed: openGame,
+                      style: ElevatedButton.styleFrom(
+                          textStyle: const TextStyle(fontSize: 30)),
+                      child: const Text("Play!"))),
+            ],
+          ),
         ),
       ),
     );
