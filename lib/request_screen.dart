@@ -16,7 +16,7 @@ class _RequestPageState extends State<RequestPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const GamePage(),
+          builder: (context) => const GamePage(seed: 123),
         ),
       );
     }

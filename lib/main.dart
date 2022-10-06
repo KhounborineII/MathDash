@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       ),
       home: const MyHomePage(title: 'Math Dash!'),
       routes: <String, WidgetBuilder>{
-        '/a': (BuildContext context) => const GamePage(),
+        '/a': (BuildContext context) => const GamePage(seed: 123),
         '/b': (BuildContext context) => const GameOverPage(),
         '/c': (BuildContext context) => const MyHomePage(title: "Math Dash"),
       },
