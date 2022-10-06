@@ -6,7 +6,9 @@ import 'package:math_dash/game_core.dart';
 import 'package:math_dash/game_over_screen.dart';
 
 class GamePage extends StatefulWidget {
-  const GamePage({super.key});
+  const GamePage({super.key, required this.seed});
+
+  final int seed;
 
   @override
   State<GamePage> createState() => _GamePageState();
@@ -14,7 +16,6 @@ class GamePage extends StatefulWidget {
 
 class _GamePageState extends State<GamePage> {
 
-  // TODO: initialize these values in a constructor or initState call
   int thisPlayerScore = 0;
   int otherPlayerScore = 0;
 
@@ -22,14 +23,15 @@ class _GamePageState extends State<GamePage> {
   late String currentQuestion;
   late int currentAnswer;
 
-  final questionGenerator = QuestionGenerator(seed: 123);
   final answerInputController = TextEditingController();
+  late final QuestionGenerator questionGenerator;
   late final Timer timer;
   
   @override
   void initState() {
     super.initState();
     timeLeft = 10;
+    questionGenerator = QuestionGenerator(seed: widget.seed);
     timer = Timer.periodic(const Duration(seconds: 1), countdown);
     nextQuestion();
   }
