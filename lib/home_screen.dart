@@ -49,6 +49,37 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void openRespond() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const RespondPage(),
+      ),
+    );
+  }
+
+  Future<void> sendRequest() async {
+    //get opponent ip from text input
+    int opponent_IP = 123;
+    Socket socket = await Socket.connect(opponent_IP, ourPort);
+    socket.write("request");
+
+    //might not want to close
+    socket.close();
+  }
+
+  void openRequest() {
+    //send request to opponent's ip
+    sendRequest;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const RequestPage(),
+      ),
+    );
+  }
+
   Future<void> _setupServer() async {
     try {
       ServerSocket server =
@@ -75,6 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
     //
     // HERE'S WHERE ONE PHONE WOULD RECEIVE A CHALLENGE I THINK
     //
+    openRespond();
   }
 
   //
@@ -90,42 +122,6 @@ class _MyHomePageState extends State<MyHomePage> {
         context,
         MaterialPageRoute(
           builder: (context) => const GamePage(seed: 123),
-        ),
-      );
-    }
-
-    Future<void> sendRequest() async {
-      Socket socket = await Socket.connect(OPPONENTipAddress, ourPort);
-      socket.write("request");
-      socket.close();
-      //From messenger app:
-      //await _add_message("Me", message);
-
-      //Future<void> _add_message(String name, String message) async {
-      //  await m.protect(() async {
-      //    _messages.add(Message(author: name, content: message));
-      //    notifyListeners();
-      //  });
-      //}
-    }
-
-    void openRequest() {
-      //send request to opponent's ip
-      sendRequest;
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const RequestPage(),
-        ),
-      );
-    }
-
-    void openRespond() {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const RespondPage(),
         ),
       );
     }
