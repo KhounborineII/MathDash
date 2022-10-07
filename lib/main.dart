@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Math Dash',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: _customColorScheme,
       ),
       home: const MyHomePage(title: 'Math Dash!'),
       routes: <String, WidgetBuilder>{
@@ -30,3 +30,22 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+// Thank you, https://sanjibsinha.com/color-flutter/
+const ColorScheme _customColorScheme = ColorScheme(
+  primary: Colors.orange,
+  secondary: Colors.orange,
+  surface: Colors.red,
+  background: customSurfaceWhite,
+  error: customMagenta900,
+  onPrimary: Colors.black,
+  onSecondary: Colors.deepOrange,
+  onSurface: Colors.white,
+  onBackground: customMagenta100,
+  onError: Colors.redAccent,
+  brightness: Brightness.dark,
+);
+const Color customMagenta100 = Color(0xfffaac9d);
+const Color customMagenta900 = Color(0xfff4310a);
+const Color customErrorRed = Color(0xFFC5032B);
+const Color customSurfaceWhite = Color(0xFFFFFBFA);
