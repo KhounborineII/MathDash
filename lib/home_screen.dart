@@ -143,6 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Text("My IP: ${_ipAddress!}"),
               SizedBox(
                 width: 300,
                 child: TextField(
