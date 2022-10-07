@@ -148,6 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     fontWeight: FontWeight.w900,
                     fontSize: 100),
               ),
+              Text("My IP: ${_ipAddress!}"),
               SizedBox(
                 width: 300,
                 child: TextField(
