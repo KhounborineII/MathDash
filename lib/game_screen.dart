@@ -15,7 +15,6 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
-
   int thisPlayerScore = 0;
   int otherPlayerScore = 0;
 
@@ -26,7 +25,7 @@ class _GamePageState extends State<GamePage> {
   final answerInputController = TextEditingController();
   late final QuestionGenerator questionGenerator;
   late final Timer timer;
-  
+
   @override
   void initState() {
     super.initState();
@@ -62,7 +61,7 @@ class _GamePageState extends State<GamePage> {
   void countdown(Timer t) {
     if (timeLeft > 0) {
       setState(() {
-        timeLeft--;        
+        timeLeft--;
       });
     } else {
       // an end message would be sent here
@@ -80,78 +79,74 @@ class _GamePageState extends State<GamePage> {
 
   @override
   Widget build(BuildContext context) {
-    
-    Color defaultBlue = Theme.of(context).primaryColor;
-    Color darkBlue = Theme.of(context).primaryColorDark;
-
     return WillPopScope(
-      onWillPop:() async => false,
+      onWillPop: () async => false,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Math Dash!'),
-          automaticallyImplyLeading: false,
-          foregroundColor: Colors.white,
-        ),
         body: Center(
           child: Column(
             children: [
+              const SizedBox(height: 50),
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Row( // Scoreboard/timer at top of screen
+                child: Row(
+                  // Scoreboard/timer at top of screen
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Column( // This player's score
+                    Column(
+                      // This player's score
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        const Text(
                           'You',
                           style: TextStyle(
-                            color: defaultBlue,
+                            color: Colors.white,
                             fontSize: 40,
                           ),
                         ),
                         Text(
                           '$thisPlayerScore',
-                          style: TextStyle(
-                            color: defaultBlue,
+                          style: const TextStyle(
+                            color: Colors.white,
                             fontSize: 40,
                           ),
                           key: const Key('thisPlayerScoreText'),
                         ),
                       ],
                     ),
-                    Column( // Timer
+                    Column(
+                      // Timer
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.timer_outlined, 
-                          color: defaultBlue,
+                        const Icon(
+                          Icons.timer_outlined,
+                          color: Colors.white,
                           size: 50,
                         ),
                         Text(
                           '$timeLeft',
-                          style: TextStyle(
-                            color: defaultBlue,
+                          style: const TextStyle(
+                            color: Colors.white,
                             fontSize: 40,
                           ),
                           key: const Key('timeLeftText'),
                         ),
                       ],
                     ),
-                    Column( // Other player's score
+                    Column(
+                      // Other player's score
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
+                        const Text(
                           'Them',
                           style: TextStyle(
-                            color: defaultBlue,
+                            color: Colors.white,
                             fontSize: 40,
                           ),
                         ),
                         Text(
                           '$otherPlayerScore',
-                          style: TextStyle(
-                            color: defaultBlue,
+                          style: const TextStyle(
+                            color: Colors.white,
                             fontSize: 40,
                           ),
                           key: const Key('otherPlayerScoreText'),
@@ -166,31 +161,35 @@ class _GamePageState extends State<GamePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text( // Current math question
+                    Text(
+                      // Current math question
                       currentQuestion,
-                      style: TextStyle(
-                            color: darkBlue,
-                            fontSize: 60,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 60,
+                        fontWeight: FontWeight.bold,
+                      ),
                       key: const Key('CurrentQuestionText'),
                     ),
                     SizedBox(
                       width: 100,
-                      child: TextField( // Input field
+                      child: TextField(
+                        // Input field
                         key: const Key('answerTextField'),
                         autofocus: true,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                         ),
                         style: const TextStyle(
-                          color: Colors.orange,
+                          color: Colors.yellow,
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
                         ),
                         controller: answerInputController,
                         keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
                         textInputAction: TextInputAction.next,
                         onSubmitted: checkAnswer,
                       ),

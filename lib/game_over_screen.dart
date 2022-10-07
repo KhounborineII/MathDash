@@ -9,9 +9,24 @@ class GameOverPage extends StatefulWidget {
 }
 
 class _GameOverPageState extends State<GameOverPage> {
+  String winLose = " ";
+  int thisPlayerScore = 0;
+  int otherPlayerScore = 0;
+
   @override
   void initState() {
     super.initState();
+    winOrLose();
+  }
+
+  void winOrLose() {
+    if (thisPlayerScore > otherPlayerScore) {
+      winLose = "You Win!";
+    } else if (thisPlayerScore < otherPlayerScore) {
+      winLose = "You Lose!";
+    } else {
+      winLose = "Its a Tie!";
+    }
   }
 
   @override
@@ -30,23 +45,42 @@ class _GameOverPageState extends State<GameOverPage> {
         return false;
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Game Over!'),
-          automaticallyImplyLeading: false,
-          foregroundColor: Colors.white,
-        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text(
-                'Game Over',
+                'Game Over!',
                 style: TextStyle(
                     color: Colors.red,
-                    fontFamily: 'Open Sans',
+                    fontWeight: FontWeight.w900,
+                    fontSize: 60),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                winLose,
+                style: const TextStyle(
+                    color: Colors.red,
                     fontWeight: FontWeight.w900,
                     fontSize: 50),
               ),
+              const SizedBox(height: 40),
+              Text(
+                'You: $thisPlayerScore',
+                style: const TextStyle(
+                    color: Colors.yellow,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 30),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Them: $otherPlayerScore',
+                style: const TextStyle(
+                    color: Colors.yellow,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 30),
+              ),
+              const SizedBox(height: 30),
               SizedBox(
                   width: 200,
                   height: 50,
@@ -54,7 +88,8 @@ class _GameOverPageState extends State<GameOverPage> {
                       key: const Key("QuitButton"),
                       onPressed: openHome,
                       style: ElevatedButton.styleFrom(
-                          textStyle: const TextStyle(fontSize: 30)),
+                          textStyle: (const TextStyle(
+                              fontSize: 30, fontWeight: FontWeight.w500))),
                       child: const Text("Back"))),
             ],
           ),

@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:math_dash/home_screen.dart';
 import 'package:math_dash/game_screen.dart';
 
@@ -10,9 +13,46 @@ class RespondPage extends StatefulWidget {
 }
 
 class _RespondPageState extends State<RespondPage> {
+  String opponentIP = "PLACEHOLDER IP TEXT";
+  late int timeLeft;
+  late final Timer timer;
+
+  @override
+  void initState() {
+    super.initState();
+    timeLeft = 10;
+    timer = Timer.periodic(const Duration(seconds: 1), countdown);
+  }
+
+  void countdown(Timer t) {
+    if (timeLeft > 0) {
+      setState(() {
+        timeLeft--;
+      });
+    } else {
+      // an end message would be sent here
+      setState(() {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MyHomePage(title: "Math Dash!"),
+          ),
+        );
+      });
+      t.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    timer.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
     void openGame() {
+      dispose();
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -22,6 +62,7 @@ class _RespondPageState extends State<RespondPage> {
     }
 
     void openHome() {
+      dispose();
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -35,18 +76,28 @@ class _RespondPageState extends State<RespondPage> {
         return false;
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text("An Opponent Appears!"),
-          automaticallyImplyLeading: false,
-        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const Text(
-                'Opponent From IP: INSERT IP HERE Is Challenging You!',
+              const Icon(
+                Icons.timer_outlined,
+                color: Colors.white,
+                size: 50,
+              ),
+              Text(
+                '$timeLeft',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 40,
+                ),
+                key: const Key('timeLeftText'),
+              ),
+              const SizedBox(height: 50),
+              Text(
+                'Opponent From IP: $opponentIP Is Challenging You!',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                     color: Colors.red,
                     fontFamily: 'Open Sans',
                     fontWeight: FontWeight.w900,

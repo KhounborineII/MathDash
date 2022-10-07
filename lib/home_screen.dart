@@ -47,14 +47,19 @@ class _MyHomePageState extends State<MyHomePage> {
         return false;
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-          automaticallyImplyLeading: false,
-        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              const Text(
+                'Math Dash!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Colors.red,
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 100),
+              ),
               SizedBox(
                 width: 300,
                 child: TextField(
@@ -72,7 +77,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       key: const Key("InviteButton"),
                       onPressed: openRequest,
                       style: ElevatedButton.styleFrom(
-                          textStyle: const TextStyle(fontSize: 40)),
+                          textStyle: const TextStyle(
+                              fontSize: 40, fontWeight: FontWeight.w400)),
                       child: const Text("Invite"))),
               const SizedBox(height: 10),
 
@@ -87,7 +93,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       key: const Key("TempRespondButton"),
                       onPressed: openRespond,
                       style: ElevatedButton.styleFrom(
-                          textStyle: const TextStyle(fontSize: 15)),
+                          textStyle: const TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w500)),
                       child: const Text("Respond Dev Button"))),
             ],
           ),
