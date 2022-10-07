@@ -18,6 +18,14 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
+enum AppPage {
+  homeScreen,
+  requestScreen,
+  respondScreen,
+  gameScreen,
+  gameOverScreen
+}
+
 class _MyAppState extends State<MyApp> {
   // why is this important? I'm not sure!
   int ourPort = 8888;
@@ -88,23 +96,35 @@ class _MyAppState extends State<MyApp> {
     print("Received '$received' from '$ip'");
     //
     //
-    //
-    // invite
-    // { "host": "host_ip_address" }
-    //
-    // ignore
-    // {}
-    //
-    // rsvp
-    // { "response": true\|false, "seed": 123 }
-    //
-    // update
-    // { "new_score": 123 }
-    //
-    // end
-    // { "final_score": 123 }
-    //
-    // openRespond();
+    // would hear invite
+    if (AppPage == "homeScreen") {
+      // invite
+      // { "host": "host_ip_address" }
+
+      //takes you to response screen
+
+      // would hear rsvp
+    } else if (AppPage == "requestScreen" || AppPage == "respondScreen") {
+      // rsvp
+      // { "response": true\|false, "seed": 123 }
+
+      // if ignore, both go back to home_screen
+      // if response is true, both go to game_screen
+
+      //would hear updates and end
+    } else if (AppPage == "gameScreen") {
+      // update
+      // { "new_score": 123 }
+
+      // end
+      // { "final_score": 123 }
+
+      //no messages
+    } else if (AppPage == "gameOverScreen") {
+      // nothing happens?
+    } else {
+      print("something has gone terribly wrong with communications");
+    }
   }
 
   // This widget is the root of your application.
