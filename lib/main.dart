@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:math_dash/home_screen.dart';
 import 'package:math_dash/game_screen.dart';
 import 'package:math_dash/game_over_screen.dart';
+import 'package:math_dash/communication.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -16,14 +17,6 @@ class MyApp extends StatefulWidget {
 
   @override
   State<MyApp> createState() => _MyAppState();
-}
-
-enum AppPage {
-  homeScreen,
-  requestScreen,
-  respondScreen,
-  gameScreen,
-  gameOverScreen
 }
 
 class _MyAppState extends State<MyApp> {
@@ -94,37 +87,8 @@ class _MyAppState extends State<MyApp> {
   void _handleIncomingMessage(String ip, Uint8List incomingData) {
     String received = String.fromCharCodes(incomingData);
     print("Received '$received' from '$ip'");
-    //
-    //
-    // would hear invite
-    if (AppPage == "homeScreen") {
-      // invite
-      // { "host": "host_ip_address" }
 
-      //takes you to response screen
-
-      // would hear rsvp
-    } else if (AppPage == "requestScreen" || AppPage == "respondScreen") {
-      // rsvp
-      // { "response": true\|false, "seed": 123 }
-
-      // if ignore, both go back to home_screen
-      // if response is true, both go to game_screen
-
-      //would hear updates and end
-    } else if (AppPage == "gameScreen") {
-      // update
-      // { "new_score": 123 }
-
-      // end
-      // { "final_score": 123 }
-
-      //no messages
-    } else if (AppPage == "gameOverScreen") {
-      // nothing happens?
-    } else {
-      print("something has gone terribly wrong with communications");
-    }
+    Screens.currentScreen.handleMessage(received);
   }
 
   // This widget is the root of your application.
@@ -142,6 +106,36 @@ class _MyAppState extends State<MyApp> {
         '/c': (BuildContext context) => const MyHomePage(title: "Math Dash"),
       },
     );
+  }
+}
+
+enum Screens {
+  homeScreen,
+  requestScreen,
+  respondScreen,
+  gameScreen,
+  resultsScreen;
+
+  static Screens currentScreen = homeScreen;
+
+  void handleMessage(String message) {
+    switch (this) {
+      case Screens.homeScreen:
+        // TODO: Handle this case.
+        break;
+      case Screens.requestScreen:
+        // TODO: Handle this case.
+        break;
+      case Screens.respondScreen:
+        // TODO: Handle this case.
+        break;
+      case Screens.gameScreen:
+        // TODO: Handle this case.
+        break;
+      case Screens.resultsScreen:
+        // TODO: Handle this case.
+        break;
+    }
   }
 }
 
