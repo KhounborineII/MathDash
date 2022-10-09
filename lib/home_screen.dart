@@ -18,6 +18,22 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  String? _ipAddress = 'Loading...';
+
+  @override
+  void initState() {
+    super.initState();
+    getWifiIP();
+  }
+
+  Future<void> getWifiIP() async {
+      String? awaitedIP = await NetworkInfo().getWifiIP();
+      setState(() {
+        _ipAddress = awaitedIP;
+      });
+  }
+
   @override
   Widget build(BuildContext context) {
     void openGame() {
