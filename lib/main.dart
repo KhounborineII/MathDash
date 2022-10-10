@@ -56,12 +56,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   String? ourIpAddress = 'Loading...';
   // why is this important? I'm not sure!
   int ourPort = 8888;
   // placeholder
-  int opponentIpAddress = 123;
+  String opponentIP = "PLACEHOLDER IP TEXT";
 
   late StreamSubscription<Socket> server_sub;
   late TextEditingController _ipController;
@@ -86,7 +85,8 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<void> _setupServer() async { // TODO: setup ONLY when a valid IP address is entered by the user
+  Future<void> _setupServer() async {
+    // TODO: setup ONLY when a valid IP address is entered by the user
     try {
       ServerSocket server =
           await ServerSocket.bind(InternetAddress.anyIPv4, ourPort);
@@ -185,9 +185,26 @@ class _MyHomePageState extends State<MyHomePage> {
     Screens.currentScreen = Screens.resultsScreen;
   }
 
+  Future<void> sendInvite(String opponent_IP) async {
+    Socket socket = await Socket.connect(opponent_IP, 8888);
+    socket.write(Message(1, MessageType.invite, {"host": ourIpAddress}));
+    socket.close();
+  }
+
+//NOT SURE IF THIS IS THE CORRECT THING TO PUT HERE!
+  void openRequest() {
+    sendInvite(opponentIP);
+    dispose();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const RequestPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-
     return WillPopScope(
       onWillPop: () async {
         return false;

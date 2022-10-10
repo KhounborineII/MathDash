@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:math_dash/communication.dart';
 import 'package:math_dash/main.dart';
 import 'package:math_dash/game_screen.dart';
 
@@ -12,6 +14,7 @@ class RequestPage extends StatefulWidget {
 }
 
 class _RequestPageState extends State<RequestPage> {
+  String opponentIP = "PLACEHOLDER IP TEXT";
   String receiverIP = "PLACEHOLDER IP TEXT";
   int timeLeft = 10;
   late final Timer timer;
@@ -59,7 +62,14 @@ class _RequestPageState extends State<RequestPage> {
       );
     }
 
+    Future<void> sendIgnore(String opponent_IP) async {
+      Socket socket = await Socket.connect(opponent_IP, 8888);
+      socket.write(Message(1, MessageType.ignore, {}));
+      socket.close();
+    }
+
     void openHome() {
+      sendIgnore(opponentIP);
       dispose();
       Navigator.push(
         context,

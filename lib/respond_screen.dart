@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:math_dash/communication.dart';
 import 'package:math_dash/main.dart';
 import 'package:math_dash/game_screen.dart';
 
@@ -12,9 +15,16 @@ class RespondPage extends StatefulWidget {
 class _RespondPageState extends State<RespondPage> {
   String opponentIP = "PLACEHOLDER IP TEXT";
 
+  Future<void> sendRSVP(String opponent_IP) async {
+    Socket socket = await Socket.connect(opponent_IP, 8888);
+    socket.write(Message(1, MessageType.rsvp, {"response": true, "seed": 123}));
+    socket.close();
+  }
+
   @override
   Widget build(BuildContext context) {
     void openGame() {
+      sendRSVP(opponentIP);
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -23,7 +33,14 @@ class _RespondPageState extends State<RespondPage> {
       );
     }
 
+    Future<void> sendIgnore(String opponent_IP) async {
+      Socket socket = await Socket.connect(opponent_IP, 8888);
+      socket.write(Message(1, MessageType.ignore, {}));
+      socket.close();
+    }
+
     void openHome() {
+      sendIgnore(opponentIP);
       Navigator.push(
         context,
         MaterialPageRoute(

@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:math_dash/communication.dart';
 import 'package:math_dash/game_core.dart';
 import 'package:math_dash/game_over_screen.dart';
 
@@ -15,6 +17,8 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
+  String opponentIP = "PLACEHOLDER IP TEXT";
+
   int thisPlayerScore = 0;
   int otherPlayerScore = 0;
 
@@ -41,9 +45,17 @@ class _GamePageState extends State<GamePage> {
     timer.cancel();
   }
 
+  Future<void> sendUpdate(String opponent_IP) async {
+    Socket socket = await Socket.connect(opponent_IP, 8888);
+    socket
+        .write(Message(1, MessageType.update, {"new_score": thisPlayerScore}));
+    socket.close();
+  }
+
   void nextQuestion() {
     MathProblem newProblem = questionGenerator.nextQuestion();
     // an update message would be sent here
+    sendUpdate(opponentIP);
     setState(() {
       currentQuestion = newProblem.question;
       currentAnswer = newProblem.answer;
@@ -58,6 +70,12 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
+  Future<void> sendEnd(String opponent_IP) async {
+    Socket socket = await Socket.connect(opponent_IP, 8888);
+    socket.write(Message(1, MessageType.end, {"final_score": thisPlayerScore}));
+    socket.close();
+  }
+
   void countdown(Timer t) {
     if (timeLeft > 0) {
       setState(() {
@@ -65,6 +83,7 @@ class _GamePageState extends State<GamePage> {
       });
     } else {
       // an end message would be sent here
+      sendEnd(opponentIP);
       setState(() {
         Navigator.push(
           context,
