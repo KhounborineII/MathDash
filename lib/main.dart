@@ -27,11 +27,6 @@ class MyApp extends StatelessWidget {
         colorScheme: _customColorScheme,
       ),
       home: const MyHomePage(title: 'Math Dash!'),
-      routes: <String, WidgetBuilder>{
-        '/a': (BuildContext context) => const GamePage(seed: 123),
-        '/b': (BuildContext context) => const GameOverPage(),
-        '/c': (BuildContext context) => const MyHomePage(title: "Math Dash"),
-      },
     );
   }
 }
@@ -43,7 +38,62 @@ enum Screens {
   gameScreen,
   resultsScreen;
 
-  static Screens currentScreen = homeScreen;
+  static List<Screens> screenStack = [homeScreen];
+  static Screens get currentScreen => screenStack.last;
+  static set currentScreen(Screens newScreen) => screenStack.add(newScreen);
+
+  static void goToHomeScreen(BuildContext context) {
+    while (screenStack[screenStack.length-1] != homeScreen) {
+      Navigator.of(context).pop(context);
+      screenStack.removeLast();
+    }
+    print('after going home, screenStack is now $screenStack');
+  }
+
+  static void goToRequestScreen(BuildContext context, String invitee) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:(context) => RequestPage(invitee: invitee),
+      ),
+    );
+    currentScreen = requestScreen;
+    print('after going to request screen, screenStack is now $screenStack');
+  }
+
+  static void goToRespondScreen(BuildContext context, String hostIp) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => RespondPage(host: hostIp),
+      ),
+    );
+    currentScreen = respondScreen;
+  }
+
+  static void goToGameScreen(BuildContext context, int seed) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:(context) => GamePage(seed: seed),
+      ),
+    );
+    currentScreen = gameScreen;
+  }
+
+  static void updateScoreboard(int newScore) {
+    // TODO: update the scoreboard on the currently active game with the new opponent score
+  }
+
+  static void updateResults(int finalScore) {
+    // TODO: update the score shown on the results screen
+  }
+
+  static void goToResultsScreen(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder:(context) => const GameOverPage(),
+      ),
+    );
+    currentScreen = resultsScreen;
+  }
 }
 
 class MyHomePage extends StatefulWidget {
@@ -61,7 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // why is this important? I'm not sure!
   int ourPort = 8888;
   // placeholder
-  int opponentIpAddress = 123;
+  dynamic opponentIpAddress;
 
   late StreamSubscription<Socket> server_sub;
   late TextEditingController _ipController;
@@ -86,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Future<void> _setupServer() async { // TODO: setup ONLY when a valid IP address is entered by the user
+  Future<void> _setupServer() async {
     try {
       ServerSocket server =
           await ServerSocket.bind(InternetAddress.anyIPv4, ourPort);
@@ -116,77 +166,84 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void handleMessage(Message message) {
+
+    try {
+      assert (message.version == 2); // Current message protocol version is 2
+    } on AssertionError {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          """You're communicating with someone with an incompatible version of 
+          Math Dash (version ${message.version}). Please make sure both of you 
+          are using the latest version."""
+        ),
+      ));
+      return;
+    }
+
     switch (Screens.currentScreen) {
       case Screens.homeScreen:
         if (message.type == MessageType.invite) {
-          goToRespondScreen(message.value['host']);
+          print("received an invite from '${message.value['host']}'");
+          Screens.goToRespondScreen(context, message.value['host']);
         }
         break;
       case Screens.requestScreen:
+        print('received a message while on the request screen');
         if (message.type == MessageType.rsvp) {
+          print('received an rsvp');
           if (message.value['response'] == false) {
-            goToHomeScreen();
+            print("received a rejection rsvp");
+            Screens.goToHomeScreen(context);
           } else {
-            goToGameScreen(message.value['seed']);
+            print("received an acceptance rsvp with seed ${message.value['seed']}");
+            Screens.goToGameScreen(context, message.value['seed']);
           }
         }
         break;
       case Screens.respondScreen:
         if (message.type == MessageType.ignore) {
-          goToHomeScreen();
+          print("received an ignore; returning to home page");
+          Screens.goToHomeScreen(context);
         }
         break;
       case Screens.gameScreen:
         if (message.type == MessageType.update) {
-          updateScoreboard(message.value['new_score']);
+          Screens.updateScoreboard(message.value['new_score']);
         } else if (message.type == MessageType.end) {
-          updateScoreboard(message.value['final_score']);
+          Screens.updateScoreboard(message.value['final_score']);
         }
         break;
       case Screens.resultsScreen:
         if (message.type == MessageType.update) {
-          updateResults(message.value['new_score']);
+          Screens.updateResults(message.value['new_score']);
         } else if (message.type == MessageType.end) {
-          updateResults(message.value['final_score']);
+          Screens.updateResults(message.value['final_score']);
         }
         break;
     }
   }
 
-  void goToRespondScreen(String hostIp) {
-    // TODO: take the user to the respond screen, letting them know who invited them
-    Screens.currentScreen = Screens.respondScreen;
-  }
-
-  void goToHomeScreen() {
-    /* TODO: take the user back to the home screen, canceling any pending actions.
-     * This should be passed to ResultsScreen so that it can call this when done.
-     */
-    Screens.currentScreen = Screens.homeScreen;
-  }
-
-  void goToGameScreen(int seed) {
-    // TODO: take the user to the game screen, using the seed provided by the invitee
-    Screens.currentScreen = Screens.gameScreen;
-  }
-
-  void updateScoreboard(int newScore) {
-    // TODO: update the scoreboard on the currently active game with the new opponent score
-  }
-
-  void updateResults(int finalScore) {
-    // TODO: update the score shown on the results screen
-  }
-
-  void goToResultsScreen() {
-    /* TODO: take the user to the results screen.
-     * This should be passed to GameScreen so that it can call this when done.
-     */
-    Screens.currentScreen = Screens.resultsScreen;
+  void invitePlayer() async {
+    String inviteIp = _ipController.text;
+    Socket socket = await Socket.connect(inviteIp, ourPort);
+    Message message = Message(2, MessageType.invite, {
+      'host': ourIpAddress
+    });
+    var jsonMessage = message.toJson();
+    String stringMessage = json.encode(jsonMessage);
+    print("sending invite: '$stringMessage'");
+    socket.write(stringMessage);
+    socket.close();
   }
 
   @override
   Widget build(BuildContext context) {
+
+    void clickInvite() {
+      print('clicked invite button');
+      invitePlayer();
+      Screens.goToRequestScreen(context, _ipController.text);
+    }
 
     return WillPopScope(
       onWillPop: () async {
@@ -210,10 +267,8 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(
                 width: 300,
                 child: TextField(
-                  onChanged: (value) {
-                    setState(() {});
-                  },
                   decoration: const InputDecoration(hintText: "IP Address"),
+                  controller: _ipController,
                 ),
               ),
               const SizedBox(height: 20),
@@ -222,7 +277,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 75,
                   child: ElevatedButton(
                       key: const Key("InviteButton"),
-                      onPressed: () {},
+                      onPressed: clickInvite,
                       style: ElevatedButton.styleFrom(
                           textStyle: const TextStyle(
                               fontSize: 40, fontWeight: FontWeight.w400)),

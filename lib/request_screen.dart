@@ -5,21 +5,28 @@ import 'package:math_dash/main.dart';
 import 'package:math_dash/game_screen.dart';
 
 class RequestPage extends StatefulWidget {
-  const RequestPage({super.key});
+  const RequestPage({super.key, required this.invitee});
+
+  final String invitee;
 
   @override
   State<RequestPage> createState() => _RequestPageState();
 }
 
 class _RequestPageState extends State<RequestPage> {
-  String receiverIP = "PLACEHOLDER IP TEXT";
-  int timeLeft = 10;
+  int timeLeft = 60;
   late final Timer timer;
 
   @override
   void initState() {
     super.initState();
     timer = Timer.periodic(const Duration(seconds: 1), countdown);
+  }
+  
+  @override
+  void dispose() {
+    super.dispose();
+    timer.cancel();
   }
 
   void countdown(Timer t) {
@@ -29,25 +36,13 @@ class _RequestPageState extends State<RequestPage> {
       });
     } else {
       // an end message would be sent here
-      setState(() {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const MyHomePage(title: "Math Dash!"),
-          ),
-        );
-      });
       t.cancel();
+      Screens.goToHomeScreen(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    @override
-    void dispose() {
-      super.dispose();
-      timer.cancel();
-    }
 
     void openGame() {
       dispose();
@@ -60,13 +55,7 @@ class _RequestPageState extends State<RequestPage> {
     }
 
     void openHome() {
-      dispose();
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const MyHomePage(title: "Math Dash!"),
-        ),
-      );
+      Screens.goToHomeScreen(context);
     }
 
     return WillPopScope(
@@ -98,7 +87,7 @@ class _RequestPageState extends State<RequestPage> {
               ),
               const SizedBox(height: 50),
               Text(
-                'Requesting to Battle Opponent at IP: $receiverIP',
+                'Requesting to Battle Opponent at IP: ${widget.invitee}',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     color: Colors.red,
@@ -116,20 +105,6 @@ class _RequestPageState extends State<RequestPage> {
                       style: ElevatedButton.styleFrom(
                           textStyle: const TextStyle(fontSize: 40)),
                       child: const Text("Cancel"))),
-              const SizedBox(height: 10),
-              // Button below to be replaced
-              // Replace button with accept response
-              // Accept response should be from other player
-
-              SizedBox(
-                  width: 250,
-                  height: 50,
-                  child: ElevatedButton(
-                      key: const Key("TempButton"),
-                      onPressed: openGame,
-                      style: ElevatedButton.styleFrom(
-                          textStyle: const TextStyle(fontSize: 20)),
-                      child: const Text("Dev Play Button"))),
             ],
           ),
         ),
