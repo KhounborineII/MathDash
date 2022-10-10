@@ -53,14 +53,39 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  Future<void> sendRequest() async {
-    //get opponent ip from text input
-
+  Future<void> sendInvite() async {
     Socket socket = await Socket.connect(opponent_IP, ourPort);
     // "invite"	{ "host": "host_ip_address" }
-    socket.write("invite");
+    socket.write(Message(1, invite, {"host": _ipAddress}));
+    socket.close();
+  }
 
-    //might not want to close
+  Future<void> sendIgnore() async {
+    Socket socket = await Socket.connect(opponent_IP, ourPort);
+    // "ignore"	{}
+    socket.write(Message(1, ignore, {"ignore": ""}));
+
+    socket.close();
+  }
+
+  Future<void> sendRSVP(bool accept) async {
+    Socket socket = await Socket.connect(opponent_IP, ourPort);
+    // "rsvp"	{ "response": true || false, "seed" : 123 }
+    socket.write(Message(1, rsvp, {"response": accept, "seed": 123}));
+    socket.close();
+  }
+
+  Future<void> sendUpdate(int score) async {
+    Socket socket = await Socket.connect(opponent_IP, ourPort);
+    // "update"	{ "new_score": 123 }
+    socket.write(Message(1, update, {"new_score": score}));
+    socket.close();
+  }
+
+  Future<void> sendEnd(score) async {
+    Socket socket = await Socket.connect(opponent_IP, ourPort);
+    // "end"	{ "final score": 123 }
+    socket.write(Message(1, end, {"final_score": score}));
     socket.close();
   }
 
