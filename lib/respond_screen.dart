@@ -1,35 +1,55 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:math_dash/home_screen.dart';
+import 'package:math_dash/communication.dart';
+import 'package:math_dash/main.dart';
 import 'package:math_dash/game_screen.dart';
 
+int ourPort = 8888;
+
 class RespondPage extends StatefulWidget {
-  const RespondPage({super.key});
+  const RespondPage({super.key, required this.host});
+
+  final String host;
 
   @override
   State<RespondPage> createState() => _RespondPageState();
 }
 
 class _RespondPageState extends State<RespondPage> {
-  String opponentIP = "PLACEHOLDER IP TEXT";
+
+  Future<void> sendRsvp(bool rsvp, [int? seed]) async {
+    if (rsvp) assert (seed != null);
+    
+    Message rsvpMessage = Message(2, MessageType.rsvp, {
+      'response': rsvp, 
+      'seed': rsvp ? seed! : -1
+    });
+    var jsonMessage = rsvpMessage.toJson();
+    String stringMessage = json.encode(jsonMessage);
+    print("sending an rsvp: '$stringMessage'");
+
+    // Modeled after Friend.send in text_messenger/friends_data.dart:
+    Socket socket = await Socket.connect(widget.host, ourPort);
+    socket.write(stringMessage);
+    socket.close();
+  }
 
   @override
   Widget build(BuildContext context) {
     void openGame() {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const GamePage(seed: 123),
-        ),
-      );
+    Screens.currentScreen = Screens.gameScreen;
+    int seedToUse = Random().nextInt(1<<16);
+    sendRsvp(true, seedToUse);
+    Screens.goToGameScreen(context, seedToUse);
     }
 
     void openHome() {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const MyHomePage(title: "Math Dash!"),
-        ),
-      );
+      Screens.currentScreen = Screens.homeScreen;
+      sendRsvp(false);
+      Navigator.pop(context);
     }
 
     return WillPopScope(
@@ -42,7 +62,7 @@ class _RespondPageState extends State<RespondPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                'Opponent From IP: $opponentIP Is Challenging You!',
+                'Opponent From IP: ${widget.host} Is Challenging You!',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     color: Colors.red,
