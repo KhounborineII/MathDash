@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:math_dash/home_screen.dart';
+import 'package:math_dash/main.dart';
 
 class GameOverPage extends StatefulWidget {
   const GameOverPage({super.key});

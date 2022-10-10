@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:math_dash/home_screen.dart';
+import 'package:math_dash/request_screen.dart';
+import 'package:math_dash/respond_screen.dart';
 import 'package:math_dash/game_screen.dart';
 import 'package:math_dash/game_over_screen.dart';
 import 'package:math_dash/communication.dart';
@@ -12,109 +15,8 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  // why is this important? I'm not sure!
-  int ourPort = 8888;
-
-  // placeholder
-  int opponent_IP = 123;
-
-  //
-
-  String? _ipAddress = "";
-  late StreamSubscription<Socket> server_sub;
-  late TextEditingController _ipController;
-
-  void initState() {
-    super.initState();
-    //_nameController = TextEditingController();
-    _ipController = TextEditingController();
-    _setupServer();
-    _findIPAddress();
-  }
-
-  void dispose() {
-    server_sub.cancel();
-    super.dispose();
-  }
-
-  Future<void> _findIPAddress() async {
-    // Thank you https://stackoverflow.com/questions/52411168/how-to-get-device-ip-in-dart-flutter
-    String? ip = await NetworkInfo().getWifiIP();
-    setState(() {
-      _ipAddress = ip;
-    });
-  }
-
-  Future<void> sendInvite() async {
-    Socket socket = await Socket.connect(opponent_IP, ourPort);
-    // "invite"	{ "host": "host_ip_address" }
-    socket.write(Message(1, MessageType.invite, {"host": _ipAddress}));
-    socket.close();
-  }
-
-  Future<void> sendIgnore() async {
-    Socket socket = await Socket.connect(opponent_IP, ourPort);
-    // "ignore"	{}
-    socket.write(Message(1, MessageType.ignore, {"ignore": ""}));
-    socket.close();
-  }
-
-  Future<void> sendRSVP(bool accept) async {
-    Socket socket = await Socket.connect(opponent_IP, ourPort);
-    // "rsvp"	{ "response": true || false, "seed" : 123 }
-    socket
-        .write(Message(1, MessageType.rsvp, {"response": accept, "seed": 123}));
-    socket.close();
-  }
-
-  Future<void> sendUpdate(int score) async {
-    Socket socket = await Socket.connect(opponent_IP, ourPort);
-    // "update"	{ "new_score": 123 }
-    socket.write(Message(1, MessageType.update, {"new_score": score}));
-    socket.close();
-  }
-
-  Future<void> sendEnd(score) async {
-    Socket socket = await Socket.connect(opponent_IP, ourPort);
-    // "end"	{ "final score": 123 }
-    socket.write(Message(1, MessageType.end, {"final_score": score}));
-    socket.close();
-  }
-
-  Future<void> _setupServer() async {
-    try {
-      ServerSocket server =
-          await ServerSocket.bind(InternetAddress.anyIPv4, ourPort);
-      server_sub = server.listen(_listenToSocket); // StreamSubscription<Socket>
-    } on SocketException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Error: $e"),
-      ));
-    }
-  }
-
-  void _listenToSocket(Socket socket) {
-    socket.listen((data) {
-      setState(() {
-        _handleIncomingMessage(socket.remoteAddress.address, data);
-      });
-    });
-  }
-
-  void _handleIncomingMessage(String ip, Uint8List incomingData) {
-    String received = String.fromCharCodes(incomingData);
-    print("Received '$received' from '$ip'");
-
-    Screens.currentScreen.handleMessage(received);
-  }
 
   // This widget is the root of your application.
   @override
@@ -142,25 +44,212 @@ enum Screens {
   resultsScreen;
 
   static Screens currentScreen = homeScreen;
+}
 
-  void handleMessage(String message) {
-    switch (this) {
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+
+  String? ourIpAddress = 'Loading...';
+  // why is this important? I'm not sure!
+  int ourPort = 8888;
+  // placeholder
+  int opponentIpAddress = 123;
+
+  late StreamSubscription<Socket> server_sub;
+  late TextEditingController _ipController;
+
+  void initState() {
+    super.initState();
+    _ipController = TextEditingController();
+    getOurIpAddress();
+    _setupServer();
+  }
+
+  void dispose() {
+    server_sub.cancel();
+    super.dispose();
+  }
+
+  Future<void> getOurIpAddress() async {
+    // Thank you https://stackoverflow.com/questions/52411168/how-to-get-device-ip-in-dart-flutter
+    String? ip = await NetworkInfo().getWifiIP();
+    setState(() {
+      ourIpAddress = ip;
+    });
+  }
+
+  Future<void> _setupServer() async { // TODO: setup ONLY when a valid IP address is entered by the user
+    try {
+      ServerSocket server =
+          await ServerSocket.bind(InternetAddress.anyIPv4, ourPort);
+      server_sub = server.listen(_listenToSocket); // StreamSubscription<Socket>
+    } on SocketException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Error: $e"),
+      ));
+    }
+  }
+
+  void _listenToSocket(Socket socket) {
+    socket.listen((data) {
+      setState(() {
+        _handleIncomingMessage(socket.remoteAddress.address, data);
+      });
+    });
+  }
+
+  void _handleIncomingMessage(String ip, Uint8List incomingData) {
+    String received = String.fromCharCodes(incomingData);
+    print("Received '$received' from '$ip'");
+    // https://stackoverflow.com/questions/55292633
+    var jsonMessage = json.decode(received);
+    Message decodedMessage = Message.fromJson(jsonMessage);
+    handleMessage(decodedMessage);
+  }
+
+  void handleMessage(Message message) {
+    switch (Screens.currentScreen) {
       case Screens.homeScreen:
-        // TODO: Handle this case.
+        if (message.type == MessageType.invite) {
+          goToRespondScreen(message.value['host']);
+        }
         break;
       case Screens.requestScreen:
-        // TODO: Handle this case.
+        if (message.type == MessageType.rsvp) {
+          if (message.value['response'] == false) {
+            goToHomeScreen();
+          } else {
+            goToGameScreen(message.value['seed']);
+          }
+        }
         break;
       case Screens.respondScreen:
-        // TODO: Handle this case.
+        if (message.type == MessageType.ignore) {
+          goToHomeScreen();
+        }
         break;
       case Screens.gameScreen:
-        // TODO: Handle this case.
+        if (message.type == MessageType.update) {
+          updateScoreboard(message.value['new_score']);
+        } else if (message.type == MessageType.end) {
+          updateScoreboard(message.value['final_score']);
+        }
         break;
       case Screens.resultsScreen:
-        // TODO: Handle this case.
+        if (message.type == MessageType.update) {
+          updateResults(message.value['new_score']);
+        } else if (message.type == MessageType.end) {
+          updateResults(message.value['final_score']);
+        }
         break;
     }
+  }
+
+  void goToRespondScreen(String hostIp) {
+    // TODO: take the user to the respond screen, letting them know who invited them
+    Screens.currentScreen = Screens.respondScreen;
+  }
+
+  void goToHomeScreen() {
+    /* TODO: take the user back to the home screen, canceling any pending actions.
+     * This should be passed to ResultsScreen so that it can call this when done.
+     */
+    Screens.currentScreen = Screens.homeScreen;
+  }
+
+  void goToGameScreen(int seed) {
+    // TODO: take the user to the game screen, using the seed provided by the invitee
+    Screens.currentScreen = Screens.gameScreen;
+  }
+
+  void updateScoreboard(int newScore) {
+    // TODO: update the scoreboard on the currently active game with the new opponent score
+  }
+
+  void updateResults(int finalScore) {
+    // TODO: update the score shown on the results screen
+  }
+
+  void goToResultsScreen() {
+    /* TODO: take the user to the results screen.
+     * This should be passed to GameScreen so that it can call this when done.
+     */
+    Screens.currentScreen = Screens.resultsScreen;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const Text(
+                'Math Dash!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Colors.red,
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 100),
+              ),
+              Text("My IP: ${ourIpAddress!}"),
+              SizedBox(
+                width: 300,
+                child: TextField(
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                  decoration: const InputDecoration(hintText: "IP Address"),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                  width: 250,
+                  height: 75,
+                  child: ElevatedButton(
+                      key: const Key("InviteButton"),
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                          textStyle: const TextStyle(
+                              fontSize: 40, fontWeight: FontWeight.w400)),
+                      child: const Text("Invite"))),
+              const SizedBox(height: 10),
+
+              // This block is commented during testing of message sending. Uncomment only if needed.
+              //
+              // // Button Below will not exist.
+              // // Button should be replaced with logic code that
+              // // relates to the network when a play request is sent.
+
+              // SizedBox(
+              //     width: 200,
+              //     height: 75,
+              //     child: ElevatedButton(
+              //         key: const Key("TempRespondButton"),
+              //         onPressed: () {},
+              //         style: ElevatedButton.styleFrom(
+              //             textStyle: const TextStyle(
+              //                 fontSize: 15, fontWeight: FontWeight.w500)),
+              //         child: const Text("Respond Dev Button"))),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
