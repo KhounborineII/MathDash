@@ -17,23 +17,13 @@ class Message {
   MessageType get type => _type;
   Map<String, dynamic> get value => _value;
 
+  // https://stackoverflow.com/questions/27236629 for serializing enum states
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> valueToReturn = 
-      _type == MessageType.invite ? {'host': _value} :
-      _type == MessageType.rsvp   ? {'response': _value == -1, 'seed': _value} :
-      _type == MessageType.update ? {'new_score': _value} :
-      _type == MessageType.end    ? {'final_score': _value} :
-      {};
-    return {'version': _version, 'type': _type, 'value': valueToReturn};
+    return {'version': _version, 'type': _type.index, 'value': _value};
   }
 
   Message.fromJson(Map<String, dynamic> json)
     : _version = json['version'],
-      _type = json['type'],
-      _value = 
-        json['type'] == MessageType.invite ? json['value']['host'] :
-        json['type'] == MessageType.rsvp   ? json['value']['seed'] :
-        json['type'] == MessageType.update ? json['value']['new_score'] :
-        json['type'] == MessageType.end    ? json['value']['final_score']:
-        null;
+      _type = MessageType.values[json['type']],
+      _value = json['value'];
 }
