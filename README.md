@@ -5,6 +5,12 @@
 ### Description
 Math Dash is a multiplayer game in which two players are given the same set of math problems to see who can solve more problems in the alloted time. This app features a local IP invite system so that you can play against other players on the same WiFi network.
 
+### Audience
+Math Dash is a game for everyone and anyone wanting to test their math against their friends (or enemies)!.
+
+### What's the Use?
+It is a game to test your mathematical genius against those who would dare go against you. Prove that you are the best at simple 5th Grade math with your quick-thinking mind!
+
 ### Gameplay Images
 ![home_screen](images/menu_screen.png)
 ![game_screen](images/game_screen.png)
