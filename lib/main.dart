@@ -43,7 +43,7 @@ enum Screens {
   static set currentScreen(Screens newScreen) => screenStack.add(newScreen);
 
   static void goToHomeScreen(BuildContext context) {
-    while (screenStack[screenStack.length-1] != homeScreen) {
+    while (screenStack[screenStack.length - 1] != homeScreen) {
       Navigator.of(context).pop(context);
       screenStack.removeLast();
     }
@@ -53,7 +53,7 @@ enum Screens {
   static void goToRequestScreen(BuildContext context, String invitee) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder:(context) => RequestPage(invitee: invitee),
+        builder: (context) => RequestPage(invitee: invitee),
       ),
     );
     currentScreen = requestScreen;
@@ -72,7 +72,7 @@ enum Screens {
   static void goToGameScreen(BuildContext context, int seed) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder:(context) => GamePage(seed: seed),
+        builder: (context) => GamePage(seed: seed),
       ),
     );
     currentScreen = gameScreen;
@@ -89,7 +89,7 @@ enum Screens {
   static void goToResultsScreen(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder:(context) => const GameOverPage(),
+        builder: (context) => const GameOverPage(),
       ),
     );
     currentScreen = resultsScreen;
@@ -106,7 +106,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   String? ourIpAddress = 'Loading...';
   // why is this important? I'm not sure!
   int ourPort = 8888;
@@ -166,16 +165,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void handleMessage(Message message) {
-
     try {
-      assert (message.version == 2); // Current message protocol version is 2
+      assert(message.version == 2); // Current message protocol version is 2
     } on AssertionError {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
-          """You're communicating with someone with an incompatible version of 
+            """You're communicating with someone with an incompatible version of 
           Math Dash (version ${message.version}). Please make sure both of you 
-          are using the latest version."""
-        ),
+          are using the latest version."""),
       ));
       return;
     }
@@ -195,7 +192,8 @@ class _MyHomePageState extends State<MyHomePage> {
             print("received a rejection rsvp");
             Screens.goToHomeScreen(context);
           } else {
-            print("received an acceptance rsvp with seed ${message.value['seed']}");
+            print(
+                "received an acceptance rsvp with seed ${message.value['seed']}");
             Screens.goToGameScreen(context, message.value['seed']);
           }
         }
@@ -226,9 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void invitePlayer() async {
     String inviteIp = _ipController.text;
     Socket socket = await Socket.connect(inviteIp, ourPort);
-    Message message = Message(2, MessageType.invite, {
-      'host': ourIpAddress
-    });
+    Message message = Message(2, MessageType.invite, {'host': ourIpAddress});
     var jsonMessage = message.toJson();
     String stringMessage = json.encode(jsonMessage);
     print("sending invite: '$stringMessage'");
@@ -238,7 +234,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     void clickInvite() {
       print('clicked invite button');
       invitePlayer();
@@ -263,11 +258,11 @@ class _MyHomePageState extends State<MyHomePage> {
                     fontWeight: FontWeight.w900,
                     fontSize: 100),
               ),
-              Text("My IP: ${ourIpAddress!}"),
               SizedBox(
                 width: 300,
                 child: TextField(
-                  decoration: const InputDecoration(hintText: "IP Address"),
+                  decoration: const InputDecoration(
+                      hintText: "Enter Your Friend's IP Address"),
                   controller: _ipController,
                 ),
               ),
@@ -280,9 +275,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       onPressed: clickInvite,
                       style: ElevatedButton.styleFrom(
                           textStyle: const TextStyle(
-                              fontSize: 40, fontWeight: FontWeight.w400)),
-                      child: const Text("Invite"))),
-              const SizedBox(height: 10),
+                              fontSize: 40,
+                              fontWeight: FontWeight.w300,
+                              fontStyle: FontStyle.italic)),
+                      child: const Text("Invite!"))),
+              const SizedBox(height: 20),
+              Text("My IP: ${ourIpAddress!}")
 
               // This block is commented during testing of message sending. Uncomment only if needed.
               //
