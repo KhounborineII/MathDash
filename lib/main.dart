@@ -262,7 +262,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 width: 300,
                 child: TextField(
                   decoration: const InputDecoration(
-                      hintText: "Enter Your Friend's IP Address"),
+                      hintText: "Enter your friend's IP Address!",
+                      hintStyle: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w300)),
                   controller: _ipController,
                 ),
               ),
